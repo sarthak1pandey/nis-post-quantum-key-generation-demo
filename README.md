@@ -24,7 +24,7 @@ After Phase 11 completes, the UI enables a **real file encryption demo**:
 
 4. **Decrypt & verify** integrity (HMAC verification + AES-GCM authenticated decrypt)
 
-## Demo / Professor flow
+## Demo flow
 
 1. Set parameters → click **Start Secure Communication** and watch all **11 phases**
 2. Upload `demo-files/resume.pdf` or `demo-files/photo.jpg`
@@ -93,6 +93,4 @@ Then open:
 This framework is an **educational simulation** for the cryptographic protocol phases, while the **file encryption layer is real** using AES-GCM and integrity verification.
 
 ---
-
-2-minute professor script is in `PROFESSOR_DEMO_SCRIPT.md`.
 

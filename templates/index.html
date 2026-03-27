@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post-Quantum Secure Communication Framework</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ════════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🔐</span>
+      <div>
+        <h1>PQC-Secure Framework</h1>
+        <p class="subtitle">Adaptive &amp; Composable Post-Quantum Cryptography</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-pqc">NIST PQC</span>
+      <span class="badge badge-hybrid">Hybrid Mode</span>
+      <span class="badge badge-ml">ML-Adaptive</span>
+    </div>
+  </div>
+</header>
+
+<section class="phase-tracker-wrap">
+  <div class="phase-tracker" id="phase-tracker"></div>
+</section>
+
+<!-- ═══════════════════════════ MAIN LAYOUT ════════════════════════════════ -->
+<main class="main-grid">
+
+  <!-- ───────────── LEFT PANEL — Configuration ─────────────────────────── -->
+  <aside class="panel config-panel">
+    <h2 class="panel-title">⚙ Configuration</h2>
+
+    <form id="config-form" autocomplete="off">
+
+      <!-- Mode -->
+      <div class="form-group">
+        <label for="mode">Cryptographic Mode</label>
+        <select id="mode" name="mode">
+          <option value="Hybrid"    selected>Hybrid (Classical + PQC)</option>
+          <option value="PQC">Post-Quantum (ML-KEM only)</option>
+          <option value="Classical">Classical (ECDHE only)</option>
+          <option value="Adaptive">Adaptive (ML Decision Tree)</option>
+        </select>
+        <span class="hint" id="mode-hint">Recommended for maximum security</span>
+      </div>
+
+      <!-- Latency -->
+      <div class="form-group">
+        <label for="latency_ms">
+          Network Latency (ms)
+          <span class="val-badge" id="lat-val">50 ms</span>
+        </label>
+        <input type="range" id="latency_ms" name="latency_ms"
+               min="5" max="500" value="50" step="5"/>
+        <div class="range-labels"><span>5 ms</span><span>500 ms</span></div>
+      </div>
+
+      <!-- Bandwidth -->
+      <div class="form-group">
+        <label for="bandwidth_kbps">
+          Bandwidth (kbps)
+          <span class="val-badge" id="bw-val">5000 kbps</span>
+        </label>
+        <input type="range" id="bandwidth_kbps" name="bandwidth_kbps"
+               min="50" max="10000" value="5000" step="50"/>
+        <div class="range-labels"><span>50</span><span>10 000</span></div>
+      </div>
+
+      <!-- CPU -->
+      <div class="form-group">
+        <label for="cpu_power_score">
+          CPU Power Score
+          <span class="val-badge" id="cpu-val">0.80</span>
+        </label>
+        <input type="range" id="cpu_power_score" name="cpu_power_score"
+               min="0.1" max="1.0" value="0.80" step="0.05"/>
+        <div class="range-labels"><span>0.1 (weak)</span><span>1.0 (strong)</span></div>
+      </div>
+
+      <!-- Message size -->
+      <div class="form-group">
+        <label for="message_size_kb">
+          Message Size (KB)
+          <span class="val-badge" id="msg-val">10 KB</span>
+        </label>
+        <input type="range" id="message_size_kb" name="message_size_kb"
+               min="1" max="500" value="10" step="1"/>
+        <div class="range-labels"><span>1 KB</span><span>500 KB</span></div>
+      </div>
+
+      <!-- Security level -->
+      <div class="form-group">
+        <label for="security_level">
+          Security Level
+          <span class="val-badge" id="sec-val">4</span>
+        </label>
+        <input type="range" id="security_level" name="security_level"
+               min="1" max="5" value="4" step="1"/>
+        <div class="range-labels"><span>1 (low)</span><span>5 (max)</span></div>
+      </div>
+
+      <!-- HNDL risk -->
+      <div class="form-group">
+        <label for="hndl_risk">
+          HNDL Risk Score
+          <span class="val-badge" id="hndl-val">0.70</span>
+        </label>
+        <input type="range" id="hndl_risk" name="hndl_risk"
+               min="0" max="1" value="0.70" step="0.05"/>
+        <div class="range-labels">
+          <span>0 (none)</span><span>1.0 (critical)</span>
+        </div>
+        <span class="hint">
+          Harvest-Now-Decrypt-Later: probability that an adversary is
+          archiving ciphertext for future quantum decryption.
+        </span>
+      </div>
+
+      <button type="submit" class="btn-start" id="start-btn">
+        <span class="btn-icon">▶</span> Start Secure Communication
+      </button>
+    </form>
+
+    <!-- Concept legend -->
+    <div class="legend">
+      <h3>📚 Key Concepts</h3>
+      <dl>
+        <dt>ECDHE</dt>
+        <dd>Elliptic Curve Diffie-Hellman Ephemeral — classical key exchange with forward secrecy.</dd>
+        <dt>ML-KEM (Kyber)</dt>
+        <dd>Module Lattice KEM — NIST PQC standard, secure against quantum computers.</dd>
+        <dt>Hybrid Mode</dt>
+        <dd>Combines classical + PQC. Secure if <em>either</em> component is secure.</dd>
+        <dt>HKDF</dt>
+        <dd>HMAC-based KDF (RFC 5869) — derives strong keys from shared secrets.</dd>
+        <dt>HNDL</dt>
+        <dd>Harvest Now Decrypt Later — nation-state attack archiving data for quantum decryption.</dd>
+        <dt>Forward Secrecy</dt>
+        <dd>Ephemeral keys ensure past sessions stay secure even if long-term key is leaked.</dd>
+        <dt>IND-CCA</dt>
+        <dd>Indistinguishability under Chosen-Ciphertext Attack — strongest KEM security notion.</dd>
+      </dl>
+    </div>
+  </aside>
+
+  <!-- ───────────── RIGHT PANEL — Console ──────────────────────────────── -->
+  <section class="panel console-panel">
+    <div class="console-header">
+      <h2 class="panel-title">⚡ Live Execution Console</h2>
+      <div class="console-controls">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-label">Idle</span>
+        <button class="btn-clear" id="clear-btn" title="Clear console">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="console-body" id="console-body">
+      <div class="console-placeholder">
+        <span class="ph-icon">🔒</span>
+        <p>Configure parameters on the left,<br/>then click <strong>Start Secure Communication</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════ RESULTS SECTION ════════════════════════════ -->
+<section class="results-section" id="results-section" style="display:none">
+
+  <h2 class="section-title">📊 Session Results</h2>
+
+  <div class="results-grid">
+
+    <!-- Session info -->
+    <div class="result-card card-session">
+      <h3>🔑 Session Key</h3>
+      <div class="result-row">
+        <span class="rl">Mode</span>
+        <span class="rv mode-badge" id="r-mode">—</span>
+      </div>
+      <div class="result-row">
+        <span class="rl">Session Key (masked)</span>
+        <code class="rv mono" id="r-key">—</code>
+      </div>
+      <div class="result-row">
+        <span class="rl">HMAC Tag</span>
+        <code class="rv mono" id="r-hmac">—</code>
+      </div>
+      <div class="result-row">
+        <span class="rl">Composition</span>
+        <span class="rv" id="r-compose">—</span>
+      </div>
+    </div>
+
+    <!-- Entropy -->
+    <div class="result-card card-entropy">
+      <h3>📈 Entropy Analysis</h3>
+      <div class="entropy-bars">
+        <div class="ebar-row">
+          <span>Pre-KDF</span>
+          <div class="ebar-wrap">
+            <div class="ebar" id="ebar-pre"></div>
+          </div>
+          <span id="etxt-pre">—</span>
+        </div>
+        <div class="ebar-row">
+          <span>Post-KDF</span>
+          <div class="ebar-wrap">
+            <div class="ebar" id="ebar-post"></div>
+          </div>
+          <span id="etxt-post">—</span>
+        </div>
+      </div>
+      <p class="entropy-note">Ideal entropy = 8.0 bits/byte (perfect randomness)</p>
+    </div>
+
+    <!-- Performance -->
+    <div class="result-card card-perf">
+      <h3>⏱ Performance Metrics</h3>
+      <div class="result-row">
+        <span class="rl">Handshake Time</span>
+        <span class="rv" id="r-latency">—</span>
+      </div>
+      <div class="result-row">
+        <span class="rl">Key-Exchange BW</span>
+        <span class="rv" id="r-bw">—</span>
+      </div>
+      <div class="result-row">
+        <span class="rl">Key Length</span>
+        <span class="rv" id="r-keylen">—</span>
+      </div>
+      <div class="result-row">
+        <span class="rl">Security Bits</span>
+        <span class="rv" id="r-secbits">—</span>
+      </div>
+    </div>
+
+    <!-- Key Ratchet Chain -->
+    <div class="result-card card-ratchet">
+      <h3>🔄 Key Ratchet Chain (Forward Secrecy)</h3>
+      <div class="ratchet-chain" id="ratchet-chain">—</div>
+      <p class="entropy-note">Each Kₙ derived via HKDF from Kₙ₋₁ — one-way, non-reversible.</p>
+    </div>
+
+    <!-- Attack Resistance -->
+    <div class="result-card card-attacks">
+      <h3>🛡 Attack Resistance Summary</h3>
+      <div id="attack-summary">—</div>
+    </div>
+
+    <!-- Failure Resilience -->
+    <div class="result-card card-resilience">
+      <h3>💥 Failure Resilience Analysis</h3>
+      <div id="resilience-summary">—</div>
+    </div>
+
+  </div>
+
+  <div class="result-card file-demo-card" id="file-demo-card">
+    <h3>🔒 Real File Encryption Demo</h3>
+    <p class="entropy-note">Phases 12-14: Upload → Encrypt → Attack Demo → Decrypt & Verify</p>
+
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="file-input" accept=".txt,.pdf,.docx,.jpg,.png" hidden />
+      <p>Drag & drop file here or <button type="button" id="pick-file-btn" class="inline-btn">choose file</button> (max 5MB)</p>
+      <p class="entropy-note">Supported: .txt, .pdf, .docx, .jpg, .png</p>
+    </div>
+
+    <div class="file-info" id="file-info">No file selected.</div>
+
+    <div class="file-actions">
+      <button type="button" class="btn-start file-btn" id="encrypt-file-btn" disabled>Encrypt with Session Key</button>
+      <button type="button" class="btn-start file-btn" id="decrypt-file-btn" disabled>Decrypt & Verify</button>
+      <a id="download-encrypted" class="inline-btn disabled-link" href="#" download>Download .pqc</a>
+      <a id="download-decrypted" class="inline-btn disabled-link" href="#" download>Download restored file</a>
+    </div>
+
+    <div class="op-progress-wrap">
+      <div class="op-progress-row">
+        <span class="rl">Encrypt Progress</span>
+        <div class="op-progress-bar"><div id="enc-progress" class="op-progress-fill"></div></div>
+      </div>
+      <div class="op-progress-row">
+        <span class="rl">Decrypt Progress</span>
+        <div class="op-progress-bar"><div id="dec-progress" class="op-progress-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="result-row file-status"><span class="rl">Status</span><span class="rv" id="file-status">Waiting for Phase 11 completion...</span></div>
+    <div class="result-row file-status"><span class="rl">Encryption</span><span class="rv" id="enc-message">—</span></div>
+    <div class="result-row file-status"><span class="rl">Decryption</span><span class="rv" id="dec-message">—</span></div>
+
+    <div class="result-card file-compare">
+      <h3>📦 File Size Comparison</h3>
+      <table class="cmp-table">
+        <thead><tr><th>Original</th><th>Encrypted</th><th>Overhead</th></tr></thead>
+        <tbody><tr><td id="cmp-original">—</td><td id="cmp-encrypted">—</td><td id="cmp-overhead">—</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="result-card card-attacks">
+      <h3>⚔ Attack Demo on Encrypted File</h3>
+      <div id="file-attack-summary">—</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FOOTER ════════════════════════════════════ -->
+<footer class="site-footer">
+  <p>
+    Adaptive &amp; Composable Post-Quantum Secure Communication Framework
+    &nbsp;|&nbsp; Simulated with Python + Flask
+    &nbsp;|&nbsp; Crypto: ML-KEM · ECDHE · HKDF · HMAC-SHA256 · Dilithium
+  </p>
+</footer>
+
+<!-- ═══════════════════════════ JAVASCRIPT ════════════════════════════════ -->
+<script>
+"use strict";
+
+/* ── DOM references ─────────────────────────────────────────── */
+const form          = document.getElementById('config-form');
+const consoleBody   = document.getElementById('console-body');
+const statusDot     = document.getElementById('status-dot');
+const statusLabel   = document.getElementById('status-label');
+const clearBtn      = document.getElementById('clear-btn');
+const startBtn      = document.getElementById('start-btn');
+const resultsSection= document.getElementById('results-section');
+const phaseTracker  = document.getElementById('phase-tracker');
+const fileInput     = document.getElementById('file-input');
+const dropZone      = document.getElementById('drop-zone');
+const pickFileBtn   = document.getElementById('pick-file-btn');
+const fileInfo      = document.getElementById('file-info');
+const encryptFileBtn= document.getElementById('encrypt-file-btn');
+const decryptFileBtn= document.getElementById('decrypt-file-btn');
+const fileStatus    = document.getElementById('file-status');
+const encMessage    = document.getElementById('enc-message');
+const decMessage    = document.getElementById('dec-message');
+const dlEnc         = document.getElementById('download-encrypted');
+const dlDec         = document.getElementById('download-decrypted');
+const fileAttackSummary = document.getElementById('file-attack-summary');
+const encProgress = document.getElementById('enc-progress');
+const decProgress = document.getElementById('dec-progress');
+
+/* ── Slider live-value display ──────────────────────────────── */
+const sliders = [
+  { id:'latency_ms',      badge:'lat-val',  fmt: v => `${v} ms`   },
+  { id:'bandwidth_kbps',  badge:'bw-val',   fmt: v => `${v} kbps` },
+  { id:'cpu_power_score', badge:'cpu-val',  fmt: v => parseFloat(v).toFixed(2) },
+  { id:'message_size_kb', badge:'msg-val',  fmt: v => `${v} KB`   },
+  { id:'security_level',  badge:'sec-val',  fmt: v => v            },
+  { id:'hndl_risk',       badge:'hndl-val', fmt: v => parseFloat(v).toFixed(2) },
+];
+
+sliders.forEach(({ id, badge, fmt }) => {
+  const el  = document.getElementById(id);
+  const lbl = document.getElementById(badge);
+  el.addEventListener('input', () => { lbl.textContent = fmt(el.value); });
+});
+
+/* ── Mode hint ──────────────────────────────────────────────── */
+const modeHints = {
+  Hybrid:    'Recommended — secure if either classical or PQC holds.',
+  PQC:       'Post-Quantum only — quantum-safe, no classical backup.',
+  Classical: 'Legacy mode — NOT quantum-safe. HNDL risk.',
+  Adaptive:  'ML Decision Tree selects the best mode for your environment.',
+};
+
+const phaseLabels = [
+  'P1 Adaptive', 'P2 Handshake', 'P3 KEX', 'P4 Compose', 'P5 HKDF', 'P6 Auth',
+  'P7 Ratchet', 'P8 Attacks', 'P9 Resilience', 'P10 Metrics', 'P11 Summary',
+  'P12 Upload', 'P13 Encrypt', 'P14 Decrypt'
+];
+let maxPhaseReached = 0;
+let currentSessionId = null;
+let selectedUpload = null;
+let encryptedId = null;
+
+function initPhaseTracker() {
+  phaseTracker.innerHTML = phaseLabels.map((label, idx) =>
+    `<span class="phase-pill" data-phase="${idx + 1}">${label}</span>`
+  ).join('');
+}
+function markPhase(phaseNo) {
+  maxPhaseReached = Math.max(maxPhaseReached, phaseNo);
+  phaseTracker.querySelectorAll('.phase-pill').forEach(el => {
+    const p = parseInt(el.dataset.phase, 10);
+    if (p <= maxPhaseReached) el.classList.add('active');
+  });
+}
+initPhaseTracker();
+document.getElementById('mode').addEventListener('change', function () {
+  document.getElementById('mode-hint').textContent = modeHints[this.value] || '';
+});
+
+/* ── Clear console ──────────────────────────────────────────── */
+clearBtn.addEventListener('click', () => {
+  consoleBody.innerHTML =
+    '<div class="console-placeholder"><span class="ph-icon">🔒</span>' +
+    '<p>Console cleared. Configure and start again.</p></div>';
+  resultsSection.style.display = 'none';
+  setStatus('idle');
+  maxPhaseReached = 0;
+  currentSessionId = null;
+  selectedUpload = null;
+  encryptedId = null;
+  initPhaseTracker();
+  resetFileDemo();
+});
+
+/* ── Status helpers ─────────────────────────────────────────── */
+function setStatus(state) {
+  statusDot.className   = 'status-dot ' + state;
+  const labels          = { idle:'Idle', running:'Running…', done:'Complete', error:'Error' };
+  statusLabel.textContent = labels[state] || state;
+}
+
+/* ── Log line renderer ──────────────────────────────────────── */
+function appendLog(event) {
+  // Remove placeholder if present
+  const ph = consoleBody.querySelector('.console-placeholder');
+  if (ph) ph.remove();
+
+  const line = document.createElement('div');
+  line.className = 'log-line log-' + (event.level || 'INFO').toLowerCase();
+
+  const ts   = document.createElement('span');
+  ts.className  = 'log-ts';
+  ts.textContent = event.timestamp || '';
+
+  const lvl  = document.createElement('span');
+  lvl.className  = 'log-lvl';
+  lvl.textContent = '[' + (event.level || 'INFO') + ']';
+
+  const msg  = document.createElement('span');
+  msg.className  = 'log-msg';
+  msg.textContent = ' ' + event.message;
+
+  line.appendChild(ts);
+  line.appendChild(lvl);
+  line.appendChild(msg);
+  consoleBody.appendChild(line);
+  const m = (event.message || '').match(/\[Phase\s+(\d+)\]/i);
+  if (m) markPhase(parseInt(m[1], 10));
+
+  // Auto-scroll
+  consoleBody.scrollTop = consoleBody.scrollHeight;
+}
+
+function addClientPhaseLog(level, message) {
+  appendLog({
+    level,
+    message,
+    timestamp: new Date().toLocaleTimeString(),
+  });
+}
+
+function fmtBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function resetFileDemo() {
+  fileInfo.textContent = 'No file selected.';
+  fileStatus.textContent = 'Waiting for Phase 11 completion...';
+  encMessage.textContent = '—';
+  decMessage.textContent = '—';
+  fileAttackSummary.textContent = '—';
+  encryptFileBtn.disabled = true;
+  decryptFileBtn.disabled = true;
+  dlEnc.classList.add('disabled-link');
+  dlDec.classList.add('disabled-link');
+  dlEnc.removeAttribute('href');
+  dlDec.removeAttribute('href');
+  document.getElementById('cmp-original').textContent = '—';
+  document.getElementById('cmp-encrypted').textContent = '—';
+  document.getElementById('cmp-overhead').textContent = '—';
+  encProgress.style.width = '0%';
+  decProgress.style.width = '0%';
+  encProgress.classList.remove('done');
+  decProgress.classList.remove('done');
+  fileStatus.classList.remove('op-success');
+  encMessage.classList.remove('op-success');
+  decMessage.classList.remove('op-success');
+}
+resetFileDemo();
+
+/* ── Results renderer ───────────────────────────────────────── */
+function renderResults(payload) {
+  resultsSection.style.display = 'block';
+  resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  /* Session info */
+  const modeEl = document.getElementById('r-mode');
+  modeEl.textContent = payload.selected_mode || '—';
+  modeEl.className   = 'rv mode-badge mode-' + (payload.selected_mode || '').toLowerCase();
+
+  document.getElementById('r-key').textContent     = payload.session_key_masked || '—';
+  document.getElementById('r-hmac').textContent    = payload.hmac_tag           || '—';
+  document.getElementById('r-compose').textContent = payload.composition_method  || '—';
+
+  /* Entropy bars */
+  const pre  = parseFloat(payload.entropy_pre_kdf  || 0);
+  const post = parseFloat(payload.entropy_post_kdf || 0);
+  document.getElementById('ebar-pre').style.width  = ((pre  / 8) * 100).toFixed(1) + '%';
+  document.getElementById('ebar-post').style.width = ((post / 8) * 100).toFixed(1) + '%';
+  document.getElementById('etxt-pre').textContent  = pre.toFixed(4);
+  document.getElementById('etxt-post').textContent = post.toFixed(4);
+
+  /* Performance */
+  const perf = payload.performance || {};
+  document.getElementById('r-latency').textContent = (perf.handshake_latency_ms || '—') + ' ms';
+  document.getElementById('r-bw').textContent      =
+    perf.bandwidth_bytes
+      ? perf.bandwidth_bytes + ' B (' + (perf.bandwidth_bytes/1024).toFixed(2) + ' KB)'
+      : '—';
+  document.getElementById('r-keylen').textContent  = (perf.key_length_bits  || '—') + ' bits';
+  document.getElementById('r-secbits').textContent = (perf.security_bits    || '—') + ' bits';
+
+  /* Ratchet chain */
+  const chain = payload.ratchet_keys || [];
+  const chainEl = document.getElementById('ratchet-chain');
+  if (chain.length) {
+    chainEl.innerHTML = chain.map((k, i) =>
+      `<div class="rnode"><code>K${i}</code><span>${k}</span></div>` +
+      (i < chain.length - 1 ? '<div class="rarrow">→</div>' : '')
+    ).join('');
+  }
+
+  /* Attack results */
+  const attacks   = payload.attack_results || [];
+  const atkEl     = document.getElementById('attack-summary');
+  if (attacks.length) {
+    atkEl.innerHTML = attacks.map(a => {
+      const cls = a.status === 'VULNERABLE' ? 'atk-vuln' : 'atk-ok';
+      const ico = a.status === 'VULNERABLE' ? '✗' : '✓';
+      return `<div class="atk-row ${cls}">
+        <span class="atk-ico">${ico}</span>
+        <div>
+          <strong>${a.attack}</strong>
+          <div class="atk-reason">${a.reason}</div>
+        </div>
+        <span class="atk-badge">${a.status}</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* Resilience */
+  const resilience = payload.resilience || [];
+  const resEl      = document.getElementById('resilience-summary');
+  if (resilience.length) {
+    resEl.innerHTML = resilience.map(r => {
+      const cls = r.status === 'VULNERABLE' ? 'atk-vuln' : 'atk-ok';
+      const ico = r.status === 'VULNERABLE' ? '✗' : '✓';
+      return `<div class="atk-row ${cls}">
+        <span class="atk-ico">${ico}</span>
+        <div>
+          <strong>${r.scenario}</strong>
+          <div class="atk-reason">${r.reason}</div>
+        </div>
+        <span class="atk-badge">${r.status}</span>
+      </div>`;
+    }).join('');
+  }
+
+  currentSessionId = payload.session_id || null;
+  if (currentSessionId) {
+    fileStatus.textContent = 'Phase 11 complete. Upload file for Phase 12.';
+    markPhase(11);
+  }
+}
+
+pickFileBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => handleFileSelection(fileInput.files[0]));
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  handleFileSelection(e.dataTransfer.files[0]);
+});
+
+async function handleFileSelection(file) {
+  if (!file) return;
+  if (!currentSessionId) {
+    fileStatus.textContent = 'Run simulation first to derive session key.';
+    return;
+  }
+  const fd = new FormData();
+  fd.append('session_id', currentSessionId);
+  fd.append('file', file);
+  fileStatus.textContent = 'Uploading file... (Phase 12)';
+  addClientPhaseLog('INFO', '[Phase 12] Uploading file for real encryption demo');
+  try {
+    const resp = await fetch('/upload', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Upload failed');
+    selectedUpload = data.upload_id;
+    fileInfo.textContent = `Name: ${data.name} | Size: ${fmtBytes(data.size)} | Type: ${data.type}`;
+    fileStatus.textContent = 'File uploaded. Ready to encrypt (Phase 13).';
+    addClientPhaseLog('SUCCESS', `[Phase 12] File upload complete: ${data.name} (${fmtBytes(data.size)})`);
+    encryptFileBtn.disabled = false;
+    markPhase(12);
+  } catch (err) {
+    fileStatus.textContent = err.message;
+    addClientPhaseLog('ERROR', `[Phase 12] Upload failed: ${err.message}`);
+    encryptFileBtn.disabled = true;
+  }
+}
+
+encryptFileBtn.addEventListener('click', async () => {
+  if (!currentSessionId || !selectedUpload) return;
+  encryptFileBtn.disabled = true;
+  fileStatus.textContent = 'Encrypting file with HKDF-derived K_enc... (Phase 13)';
+  addClientPhaseLog('INFO', '[Phase 13] AES-256-GCM encryption started using HKDF-derived K_enc');
+  encProgress.style.width = '20%';
+  encProgress.classList.remove('done');
+  try {
+    encProgress.style.width = '55%';
+    const resp = await fetch('/encrypt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: currentSessionId, upload_id: selectedUpload }),
+    });
+    encProgress.style.width = '85%';
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Encryption failed');
+    encryptedId = data.encrypted_id;
+    encMessage.textContent = data.message;
+    encMessage.classList.add('op-success');
+    dlEnc.href = data.download_url;
+    dlEnc.classList.remove('disabled-link');
+    decryptFileBtn.disabled = false;
+    fileStatus.textContent = 'Encryption successful ✓';
+    fileStatus.classList.add('op-success');
+    addClientPhaseLog('SUCCESS', '[Phase 13] Encrypted file generated (.pqc) with authenticated encryption');
+    encProgress.style.width = '100%';
+    encProgress.classList.add('done');
+    markPhase(13);
+
+    document.getElementById('cmp-original').textContent = fmtBytes(data.comparison.original);
+    document.getElementById('cmp-encrypted').textContent = fmtBytes(data.comparison.encrypted);
+    const ov = data.comparison.overhead >= 0 ? `+${fmtBytes(data.comparison.overhead)}` : fmtBytes(data.comparison.overhead);
+    document.getElementById('cmp-overhead').textContent = ov;
+
+    const attacks = data.file_attack_results || [];
+    fileAttackSummary.innerHTML = attacks.map(a => {
+      const vuln = a.status === 'VULNERABLE';
+      return `<div class="atk-row ${vuln ? 'atk-vuln' : 'atk-ok'}">
+        <span class="atk-ico">${vuln ? '✗' : '✓'}</span>
+        <div><strong>${a.name}</strong><div class="atk-reason">${a.message}</div></div>
+        <span class="atk-badge">${a.status}</span>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    fileStatus.textContent = err.message;
+    addClientPhaseLog('ERROR', `[Phase 13] Encryption failed: ${err.message}`);
+    encProgress.style.width = '0%';
+  } finally {
+    encryptFileBtn.disabled = !selectedUpload;
+  }
+});
+
+decryptFileBtn.addEventListener('click', async () => {
+  if (!currentSessionId || !encryptedId) return;
+  decryptFileBtn.disabled = true;
+  fileStatus.textContent = 'Decrypting and verifying HMAC... (Phase 14)';
+  addClientPhaseLog('INFO', '[Phase 14] Decryption and integrity verification started');
+  decProgress.style.width = '25%';
+  decProgress.classList.remove('done');
+  try {
+    decProgress.style.width = '60%';
+    const resp = await fetch('/decrypt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: currentSessionId, encrypted_id: encryptedId }),
+    });
+    decProgress.style.width = '88%';
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Decryption failed');
+    dlDec.href = data.download_url;
+    dlDec.classList.remove('disabled-link');
+    decMessage.textContent = `${data.message} Hash match: ${data.restored ? 'YES ✓' : 'NO ✗'}`;
+    decMessage.classList.add('op-success');
+    fileStatus.textContent = 'Original file restored ✓';
+    fileStatus.classList.add('op-success');
+    addClientPhaseLog('SUCCESS', '[Phase 14] Original file restored and verified (HMAC + hash match)');
+    decProgress.style.width = '100%';
+    decProgress.classList.add('done');
+    markPhase(14);
+  } catch (err) {
+    fileStatus.textContent = err.message;
+    addClientPhaseLog('ERROR', `[Phase 14] Decryption failed: ${err.message}`);
+    decProgress.style.width = '0%';
+  } finally {
+    decryptFileBtn.disabled = false;
+  }
+});
+
+/* ── Form submit → fetch + stream ───────────────────────────── */
+form.addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  // Clear console
+  consoleBody.innerHTML = '';
+  resultsSection.style.display = 'none';
+  resetFileDemo();
+  maxPhaseReached = 0;
+  initPhaseTracker();
+  selectedUpload = null;
+  encryptedId = null;
+  currentSessionId = null;
+  setStatus('running');
+  startBtn.disabled = true;
+  startBtn.textContent = '⏳ Running…';
+
+  const body = {
+    mode            : document.getElementById('mode').value,
+    latency_ms      : document.getElementById('latency_ms').value,
+    bandwidth_kbps  : document.getElementById('bandwidth_kbps').value,
+    cpu_power_score : document.getElementById('cpu_power_score').value,
+    message_size_kb : document.getElementById('message_size_kb').value,
+    security_level  : document.getElementById('security_level').value,
+    hndl_risk       : document.getElementById('hndl_risk').value,
+  };
+
+  try {
+    const response = await fetch('/simulate', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(body),
+    });
+
+    if (!response.ok) throw new Error('Server returned ' + response.status);
+
+    const reader  = response.body.getReader();
+    const decoder = new TextDecoder();
+    let   buffer  = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // SSE messages are separated by double newline
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop();  // Keep the incomplete last part
+
+      for (const part of parts) {
+        const line = part.trim();
+        if (!line.startsWith('data:')) continue;
+
+        let parsed;
+        try {
+          parsed = JSON.parse(line.slice(5).trim());
+        } catch (_) {
+          continue;
+        }
+
+        if (parsed.type === 'end') {
+          // Stream finished
+          break;
+        } else if (parsed.type === 'log') {
+          appendLog(parsed);
+        } else if (parsed.type === 'results') {
+          renderResults(parsed.payload);
+          setStatus('done');
+        }
+      }
+    }
+
+  } catch (err) {
+    appendLog({
+      level    : 'ERROR',
+      message  : 'Connection error: ' + err.message,
+      timestamp: new Date().toLocaleTimeString(),
+    });
+    setStatus('error');
+  } finally {
+    startBtn.disabled    = false;
+    startBtn.innerHTML   = '<span class="btn-icon">▶</span> Start Secure Communication';
+    if (statusLabel.textContent === 'Running…') setStatus('done');
+  }
+});
+</script>
+
+</body>
+</html>
